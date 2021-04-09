@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.AssistantDao">
+
+	<select id="getForPrintAssistants" resultType="Assistant">
+		SELECT A.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) >= 0.5,
+		ROUND(AVG(R.point)),
+		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint,
+		FRA.funeralId AS extra__relFuneralId
+		FROM `assistant` AS A
+		LEFT JOIN `rating` AS R
+		ON
+		R.relTypeCode = 'assistant'
+		AND A.id = R.relId
+		LEFT JOIN `funeralRelAssts` AS FRA
+		ON A.id = FRA.assistantId
+		WHERE 1
+		GROUP BY A.id
+		ORDER BY A.id DESC
+	</select>
+
+	<select id="getAssistants" resultType="Assistant">
+		SELECT A.*
+		FROM `assistant` AS A
+		ORDER BY A.id DESC
+	</select>
+
+	<!-- public void join(String title, String body); -->
+	<insert id="join" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `assistant`
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+			loginId = #{loginId},
+			loginPw = #{loginPw},
+			`name` = #{name},
+			`email` = #{email},
+			`cellphoneNo` = #{cellphoneNo},
+			`region` = #{region},
+			`career` = #{career},
+			authKey = CONCAT("authKey3__", UUID(), "__", RAND())
+		</set>
+
+	</insert>
+	<!-- public Assistant getAssistant(@Param(value = "id") int id); -->
+	<select id="getAssistant" resultType="Assistant">
+		SELECT *
+		FROM `assistant`
+		WHERE id = #{id}
+	</select>
+
+	<select id="getForPrintAssistant" resultType="Assistant">
+		SELECT *
+		FROM `assistant`
+		WHERE id = #{id}
+	</select>
+
+	<!-- public Assistant getAssistantByLoginId(@Param(value = "loginId") String 
+		loginId); -->
+	<select id="getAssistantByLoginId" resultType="Assistant">
+		SELECT *
+		FROM `assistant`
+		WHERE loginId = #{loginId}
+	</select>
+
+	<select id="getAssistantByAuthKey" resultType="Assistant">
+		SELECT *
+		FROM `assistant`
+		WHERE authKey = #{authKey}
+	</select>
+
+	<!-- public void modifyAssistant(Map<String, Object> param); -->
+	<update id="modifyAssistant">
+		UPDATE `assistant`
+		<set>
+			<if
+				test="loginPw != null || name != null || cellphoneNo != null || email != null || region != null || career != null">
+				updateDate = NOW()
+			</if>
+			<if test="loginPw != null">
+				, loginPw = #{loginPw}
+			</if>
+			<if test="name != null">
+				, `name` = #{name}
+			</if>
+			<if test="cellphoneNo != null">
+				, cellphoneNo = #{cellphoneNo}
+			</if>
+			<if test="email != null">
+				, email = #{email}
+			</if>
+			<if test="region != null">
+				, region = #{region}
+			</if>
+			<if test="career != null">
+				, `career` = #{career}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+
+</mapper>

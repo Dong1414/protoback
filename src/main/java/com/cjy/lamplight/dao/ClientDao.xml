@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.ClientDao">
+
+	<select id="getForPrintClients" resultType="Client">
+		SELECT C.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) >= 0.5,
+		ROUND(AVG(R.point)),
+		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint
+		FROM `client` AS C
+		LEFT JOIN `rating` AS R
+		ON
+		R.relTypeCode = 'client'
+		AND C.id = R.relId
+		WHERE 1
+		GROUP BY C.id
+		ORDER BY C.id DESC
+	</select>
+
+	<select id="getClients" resultType="Client">
+		SELECT C.*
+		FROM `client` AS C
+		ORDER BY C.id DESC
+	</select>
+
+	<!-- public void join(String title, String body); -->
+	<insert id="join" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO client
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+			loginId = #{loginId},
+			loginPw = #{loginPw},
+			`name` = #{name},
+			`email` = #{email},
+			`cellphoneNo` = #{cellphoneNo},
+			`region` = #{region},
+			authKey = CONCAT("authKey1__", UUID(), "__", RAND())
+		</set>
+
+	</insert>
+	<!-- public Client getClient(@Param(value = "id") int id); -->
+	<select id="getClient" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE id = #{id}
+	</select>
+
+	<select id="getForPrintClient" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE id = #{id}
+	</select>
+
+	<!-- public Client getClientByLoginId(@Param(value = "loginId") String loginId); -->
+	<select id="getClientByLoginId" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE loginId = #{loginId}
+	</select>
+
+	<select id="getClientByAuthKey" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE authKey = #{authKey}
+	</select>
+
+	<!-- public void modifyClient(Map<String, Object> param); -->
+	<update id="modifyClient">
+		UPDATE `client`
+		<set>
+			<if
+				test="loginPw != null || name != null || cellphoneNo != null || email != null || region != null">
+				updateDate = NOW()
+			</if>
+			<if test="loginPw != null">
+				, loginPw = #{loginPw}
+			</if>
+			<if test="name != null">
+				, `name` = #{name}
+			</if>
+			<if test="cellphoneNo != null">
+				, cellphoneNo = #{cellphoneNo}
+			</if>
+			<if test="email != null">
+				, email = #{email}
+			</if>
+			<if test="region != null">
+				, `region` = #{region}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+	<select id="getClientByNameAndEmail" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE 1
+		AND `name` = #{name}
+		AND `email` = #{email}
+	</select>
+	
+	<select id="getMemberByLoginIdAndEmail" resultType="Client">
+		SELECT *
+		FROM `client`
+		WHERE 1
+		AND `loginId` = #{loginId}
+		AND `email` = #{email}
+	</select>
+
+</mapper>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.MemberDao">
+
+	<select id="getForPrintMembers" resultType="Member">
+		SELECT M.*,
+		IF(
+		(ROUND(AVG(S.point),1)-(ROUND(AVG(S.point),1)-0.5)) > 0.5,
+ 		ROUND(AVG(S.point)),
+ 		ROUND(AVG(S.point))-0.5
+		) AS extra__starPoint
+		FROM `member` AS M
+		LEFT JOIN starRating AS S
+		ON S.relTypeCode = 'member'
+		AND M.id = S.relId
+		WHERE 1
+<if test="authLevel != null and authLevel != ''">
+			AND M.authLevel = #{authLevel}
+		</if>
+GROUP BY M.id
+ORDER BY M.id DESC
+	</select>
+	
+	<select id="getMembers" resultType="Member">
+		SELECT M.*
+		FROM `member` AS M
+		ORDER BY M.id DESC
+	</select>
+	
+	<select id="getDirectors" resultType="Member">
+		SELECT M.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) >= 0.5,
+ 		ROUND(AVG(R.point)),
+ 		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint
+		FROM `member` AS M
+		LEFT JOIN `rating` AS R
+		ON R.relTypeCode = 'director'
+		AND M.id = R.relId
+		WHERE M.authLevel = 5
+		GROUP BY M.id
+		ORDER BY M.id DESC
+	</select>
+
+	<!-- public void join(String title, String body); -->
+	<insert id="join" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO member
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+			loginId = #{loginId},
+			loginPw = #{loginPw},
+			`name` = #{name},
+			`nickname` = #{nickname},
+			`email` = #{email},
+			`cellphoneNo` = #{cellphoneNo},
+    		`address` = #{address},
+    		authLevel = #{authLevel},
+			authKey = CONCAT("authKey1__", UUID(), "__", RAND())
+		</set>
+
+	</insert>
+	<!-- public Member getMember(@Param(value = "id") int id); -->
+	<select id="getMember" resultType="Member">
+		SELECT *
+		FROM `member`
+		WHERE id = #{id}
+	</select>
+	
+	<select id="getForPrintMember" resultType="Member">
+		SELECT *
+		FROM `member`
+		WHERE id = #{id}
+	</select>
+	
+	<!-- public Member getMemberByLoginId(@Param(value = "loginId") String loginId); -->
+	<select id="getMemberByLoginId" resultType="Member">
+		SELECT *
+		FROM `member`
+		WHERE loginId = #{loginId}
+	</select>
+	
+	<select id="getMemberByAuthKey" resultType="Member">
+		SELECT *
+		FROM `member`
+		WHERE authKey = #{authKey}
+	</select>
+
+	<!-- public void modifyMember(Map<String, Object> param); -->
+	<update id="modifyMember">
+		UPDATE member
+		<set>
+			<if test="loginPw != null || name != null || nickname != null || cellphoneNo != null || email != null || authLevel != null">
+				updateDate = NOW()
+			</if>
+			<if test="loginPw != null">
+				, loginPw = #{loginPw}
+			</if>
+			<if test="name != null">
+				, `name` = #{name}
+			</if>
+			<if test="nickname != null">
+				, nickname = #{nickname}
+			</if>
+			<if test="cellphoneNo != null">
+				, cellphoneNo = #{cellphoneNo}
+			</if>
+			<if test="email != null">
+				, email = #{email}
+			</if>
+			<if test="authLevel != null">
+				, authLevel = #{authLevel}
+			</if>
+			<if test="address != null">
+				, `address` = #{address}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+
+</mapper>

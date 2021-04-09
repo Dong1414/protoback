@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.RatingDao">
+
+	<insert id="addRating" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO rating
+		<set>
+		regDate = NOW(),
+		updateDate = NOW(),
+		relTypeCode = #{relTypeCode},
+		relId = #{relId},
+		clientId = #{clientId},
+		`point` = #{point}
+		</set>
+	</insert>
+	
+	
+	<select id="getRating" resultType="Rating">
+		SELECT R.*
+		FROM rating AS R
+		WHERE 1
+		AND R.id = #{id}
+	</select>
+	
+	<select id="getRatingRelClient" resultType="Rating">
+		SELECT R.*
+		FROM `rating` AS R
+		WHERE 1
+		AND R.relTypeCode = #{relTypeCode}
+		AND R.relId = #{relId}
+		AND R.clientId = #{clientId}
+	</select>
+
+	<delete id="deleteRating">
+		DELETE FROM `rating`
+		WHERE 1
+		AND relTypeCode = #{relTypeCode}
+		AND relId = #{relId}
+		AND clientId = #{clientId}
+	</delete>
+	
+	<update id="modifyRating">
+		UPDATE `rating`
+		<set>
+			<if test="point != null">
+				updateDate = NOW(),
+				`point` = #{point}
+			</if>
+		</set>
+		WHERE 1
+		AND `relTypeCode` = #{relTypeCode}
+		AND `relId` = #{relId}
+		AND `clientId` = #{clientId}
+	</update>
+
+</mapper>

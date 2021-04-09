@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.ReviewDao">
+
+	<insert id="addReview" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO review
+		<set>
+		regDate = NOW(),
+		updateDate = NOW(),
+		relTypeCode = #{relTypeCode},
+		relId = #{relId},
+		`body` = #{body},
+		clientId = #{clientId}
+		</set>
+	</insert>
+	
+
+	<select id="getForPrintReviews" resultType="Review">
+		SELECT R.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName
+		FROM review AS R
+		LEFT JOIN `client` AS C
+		ON R.clientId = C.id
+		WHERE 1
+		AND R.relTypeCode = #{relTypeCode}
+	</select>
+	
+	<select id="getReview" resultType="Review">
+		SELECT R.*
+		FROM review AS R
+		WHERE 1
+		AND R.id = #{id}
+	</select>
+	
+	<select id="getForPrintReview" resultType="Review">
+		SELECT R.*
+		FROM `review` AS R
+		WHERE 1
+		AND R.id = #{id}
+	</select>
+	
+	<select id="getReviewByClientIdAndRelId" resultType="Review">
+		SELECT R.*
+		FROM review AS R
+		WHERE 1
+		AND R.clientId = #{clientId}
+		AND R.relId = #{relId}
+	</select>
+
+	<delete id="deleteReview">
+		DELETE FROM review
+		WHERE id = #{id}
+	</delete>
+	
+	<update id="modifyReview">
+		UPDATE `review`
+		<set>
+			<if test="body != null">
+				updateDate = NOW(),
+			</if>
+			<if test="body != null">
+				`body` = #{body},
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+
+</mapper>

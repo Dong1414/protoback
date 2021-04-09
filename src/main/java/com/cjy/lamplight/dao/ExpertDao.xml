@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.ExpertDao">
+
+	<update id="setWork1">
+		UPDATE `expert`
+		<set>			
+		updateDate = NOW(),
+		`work` = 1											
+		</set>
+		WHERE id = #{expertId}
+	</update>	
+	
+	<update id="setWork2">
+		UPDATE `expert`
+		<set>			
+		updateDate = NOW(),
+		`work` = 2											
+		</set>
+		WHERE id = #{expertId}
+	</update>	
+	
+	<select id="getForPrintExperts" resultType="Expert">
+		SELECT E.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) >= 0.5,
+		ROUND(AVG(R.point)),
+		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint
+		FROM `expert` AS E
+		LEFT JOIN `rating` AS R
+		ON
+		R.relTypeCode = 'expert'
+		AND E.id = R.relId
+		WHERE 1
+		GROUP BY E.id
+		ORDER BY E.id DESC
+	</select>
+
+	<select id="getExperts" resultType="Expert">
+		SELECT E.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) > 0.5,
+		ROUND(AVG(R.point)),
+		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint
+		FROM `expert` AS E
+		LEFT JOIN `rating` AS R
+		ON
+		R.relTypeCode = 'expert'
+		AND E.id = R.relId
+		WHERE 1
+		GROUP BY E.id
+		ORDER BY E.id DESC
+	</select>
+	
+	<select id="getForPrintExpertsByRegion" resultType="Expert">
+		SELECT E.*,
+		IF(
+		(ROUND(AVG(R.point),1)-(ROUND(AVG(R.point),1)-0.5)) >= 0.5,
+		ROUND(AVG(R.point)),
+		ROUND(AVG(R.point))-0.5
+		) AS extra__ratingPoint
+		FROM `expert` AS E
+		LEFT JOIN `rating` AS R
+		ON
+		R.relTypeCode = 'expert'
+		AND E.id = R.relId
+		WHERE 1
+		AND E.region = #{region}
+		GROUP BY E.id
+		ORDER BY E.id DESC
+	</select>
+
+	<!-- public void join(String title, String body); -->
+	<insert id="join" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `expert`
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+			loginId = #{loginId},
+			loginPw = #{loginPw},
+			`name` = #{name},
+			`email` = #{email},
+			`cellphoneNo` = #{cellphoneNo},
+			`region` = #{region},
+			`license` = #{license},			
+			authKey = CONCAT("authKey2__", UUID(), "__", RAND())
+		</set>
+
+	</insert>
+	<!-- public Expert getExpert(@Param(value = "id") int id); -->
+	<select id="getExpert" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE id = #{id}
+	</select>
+
+	<select id="getForPrintExpert" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE id = #{id}
+	</select>
+
+	<!-- public Expert getExpertByLoginId(@Param(value = "loginId") String loginId); -->
+	<select id="getExpertByLoginId" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE loginId = #{loginId}
+	</select>
+
+	<select id="getExpertByAuthKey" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE authKey = #{authKey}
+	</select>
+
+	<!-- public void modifyExpert(Map<String, Object> param); -->
+	<update id="modifyExpert">
+		UPDATE `expert`
+		<set>
+			<if
+				test="loginPw != null || name != null || cellphoneNo != null || email != null || acknowledgment_step != null || region != null || license != null || career != null">
+				updateDate = NOW()
+			</if>
+			<if test="loginPw != null">
+				, loginPw = #{loginPw}
+			</if>
+			<if test="name != null">
+				, `name` = #{name}
+			</if>
+			<if test="cellphoneNo != null">
+				, cellphoneNo = #{cellphoneNo}
+			</if>
+			<if test="email != null">
+				, email = #{email}
+			</if>
+			<if test="acknowledgment_step != null">
+				, acknowledgment_step = #{acknowledgment_step}
+			</if>
+			<if test="region != null">
+				, region = #{region}
+			</if>
+			<if test="license != null">
+				, `license` = #{license}
+			</if>
+			<if test="career != null">
+				, `career` = #{career}
+			</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<select id="getExpertByNameAndEmail" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE 1
+		AND `name` = #{name}
+		AND `email` = #{email}
+	</select>
+	
+	<select id="getMemberByLoginIdAndEmail" resultType="Expert">
+		SELECT *
+		FROM `expert`
+		WHERE 1
+		AND `loginId` = #{loginId}
+		AND `email` = #{email}
+	</select>
+
+</mapper>

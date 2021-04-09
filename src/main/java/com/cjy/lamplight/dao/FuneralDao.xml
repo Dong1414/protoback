@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.FuneralDao">
+
+	<insert id="addFuneral" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `funeral`
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+    		religion = #{religion},
+    		`startDate` = #{startDate},
+    		`endDate` = #{endDate},
+    		deceasedName = #{deceasedName},
+  			bereavedName = #{bereavedName},
+    		funeralHome = #{funeralHome},
+    		region = #{region},
+    		`body` = #{body},
+    		`expertId` = #{expertId},
+    		`clientId` = #{clientId},
+    		stepLevel = #{stepLevel}
+		</set>
+	</insert>
+
+	<select id="getForPrintFunerals" resultType="Funeral">
+		SELECT F.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName
+		FROM `funeral` AS F
+		LEFT JOIN `client` AS C
+		ON F.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON F.expertId = E.id
+		ORDER BY F.id DESC
+	</select>
+
+	<select id="getForPrintFuneralsByMemberId" resultType="Funeral">
+		SELECT F.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName
+		FROM `funeral` AS F
+		LEFT JOIN `client` AS C
+		ON F.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON F.expertId = E.id
+		WHERE 1
+    	<if test="expertId != 0">
+    	AND F.expertId = #{expertId}
+    	</if>
+    	<if test="assistantId != 0">
+    	AND F.id = (
+    	SELECT funeralId 
+    	FROM funeralRelAssts
+		WHERE assistantId = #{assistantId}
+		AND funeralId = F.id
+		)
+    	</if>
+		ORDER BY F.id DESC
+	</select>
+	
+	<select id="getAssistantIdByFuneralId" resultType="Integer">
+		SELECT assistantId
+		FROM funeralRelAssts
+		WHERE funeralId = #{funeralId}
+	</select>
+	
+	<insert id="asstApplyForFuneral" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `funeralRelAssts`
+		<set> 
+			funeralId = #{funeralId},
+			assistantId = #{assistantId}
+		</set>
+	</insert>
+
+	<delete id="asstCancleApplyForFuneral">
+		DELETE FROM `funeralRelAssts`
+		WHERE funeralId = #{funeralId} 
+		AND assistantId = #{assistantId}
+	</delete>
+	
+
+</mapper>

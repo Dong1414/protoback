@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cjy.lamplight.dao.OrderDao">
+
+	<update id="orderReject">
+		UPDATE `order`
+		<set>			
+		updateDate = NOW(),
+		stepLevel = 1,
+		expertId = 0											
+		</set>
+		WHERE id = #{orderId}
+	</update>
+	
+	<update id="setSetp2">
+		UPDATE `order`
+		<set>			
+		updateDate = NOW(),
+		stepLevel = 2,
+		expertId = #{expertId}											
+		</set>
+		WHERE id = #{orderId}
+	</update>
+	
+	<!-- public Order getOrder(int id); -->
+	<select id="getOrder" resultType="Order">
+		SELECT *
+		FROM `order`
+		WHERE id = #{id}
+	</select>
+
+	<select id="getForPrintOrder" resultType="Order">
+		SELECT O.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName,
+		C.cellphoneNo AS extra__clientCellphoneNo,
+		E.cellphoneNo AS extra__expertCellphoneNo
+		FROM `order` AS O
+		LEFT JOIN `client` AS C
+		ON O.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON O.expertId = E.id
+		WHERE O.id = #{id}
+	</select>
+
+
+	<select id="orders" resultType="Order">
+		SELECT *
+		FROM `order`
+		ORDER BY id DESC
+	</select>
+
+
+	<select id="getForPrintOrders" resultType="Order">
+		SELECT O.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName,
+		C.cellphoneNo AS extra__clientCellphoneNo,
+		E.cellphoneNo AS extra__expertCellphoneNo
+		FROM `order` AS O
+		LEFT JOIN `client` AS C
+		ON O.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON O.expertId = E.id
+		ORDER BY O.id DESC
+	</select>
+	
+	<select id="getForPrintOrdersByMemberId" resultType="Order">
+		SELECT O.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName,
+		C.cellphoneNo AS extra__clientCellphoneNo,
+		E.cellphoneNo AS extra__expertCellphoneNo
+		FROM `order` AS O
+		LEFT JOIN `client` AS C
+		ON O.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON O.expertId = E.id
+		WHERE 1
+		<if test="clientId != 0">
+    	AND O.clientId = #{clientId}
+    	</if>
+    	<if test="expertId != 0">
+    	AND O.expertId = #{expertId}
+    	AND O.stepLevel = 2
+    	</if>
+		ORDER BY O.id DESC
+	</select>
+	
+	
+	<select id="getForPrintExpertOrders" resultType="Order">
+		SELECT O.*,
+		IFNULL(C.name, "탈퇴회원") AS extra__clientName,
+		IFNULL(E.name, "탈퇴회원") AS extra__expertName,
+		C.cellphoneNo AS extra__clientCellphoneNo,
+		E.cellphoneNo AS extra__expertCellphoneNo
+		FROM `order` AS O
+		LEFT JOIN `client` AS C
+		ON O.clientId = C.id
+		LEFT JOIN `expert` AS E
+		ON O.expertId = E.id
+		WHERE 1		    	
+    	AND O.region = #{region}
+    	AND O.stepLevel = 1    	
+		ORDER BY O.id DESC
+	</select>
+	
+	<!-- public void addOrder(String title, String body); -->
+	<insert id="addOrder" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `order`
+		<set> <!-- SET 대신 set으로 감싸주는 것이 관례 -->
+			regDate = NOW(),
+			updateDate = NOW(),
+    		religion = #{religion},
+    		`startDate` = #{startDate},
+    		`endDate` = #{endDate},
+    		deceasedName = #{deceasedName},
+  			bereavedName = #{bereavedName},
+    		funeralHome = #{funeralHome},
+    		region = #{region},
+    		`body` = #{body},
+    		`expertId` = #{expertId},
+    		`clientId` = #{clientId}
+		</set>
+	</insert>
+
+	<!-- public void deleteOrder(int id); -->
+	<delete id="deleteOrder">
+		DELETE FROM `order`
+		WHERE id = #{id}
+	</delete>
+
+	<!-- public void modifyOrder(int id, String title, String body); -->
+	<update id="modifyOrder">
+		UPDATE `order`
+		<set>  <!-- set으로 감싸는 이유? 만약 set안의 내용이 채워지지 않았을 경우 다음 단계 진행 안하고 멈춤(쿼리 오류 방지) -->
+			updateDate = NOW(),
+    		religion = #{religion},
+    		`startDate` = #{startDate},
+    		`endDate` = #{endDate},
+    		deceasedName = #{deceasedName},
+  			bereavedName = #{bereavedName},
+    		funeralHome = #{funeralHome},
+    		region = #{region},
+    		`body` = #{body},
+    		`expertId` = #{expertId},
+    		`clientId` = #{clientId}
+    		<if test="stepLevel != null">
+    			, stepLevel = #{stepLevel}
+    		</if>
+		</set>
+		WHERE id = #{id}
+	</update>
+	
+	<update id="changeStepLevel">
+		UPDATE `order`
+		<set>  
+			updateDate = NOW(),
+			stepLevel = #{nextStepLevel}
+		</set>
+		WHERE id = #{id}
+	</update>
+
+</mapper>
