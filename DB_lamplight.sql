@@ -134,8 +134,8 @@ CREATE TABLE `expert` (
     `email` CHAR(100) NOT NULL,
     `cellphoneNo` CHAR(20) NOT NULL,
     `region` CHAR(100) NOT NULL, #활동지역
-    `license` CHAR(100) NOT NULL,  #자격증    
-    `career` TEXT NOT NULL #경력
+    `license` CHAR(100) NOT NULL,  #자격증   
+    `work` SMALLINT(2) UNSIGNED DEFAULT 1 NOT NULL COMMENT '(1=대기중 2=일중)'
 );
 
 # 로그인 ID로 검색했을 때
@@ -143,7 +143,7 @@ ALTER TABLE `expert` ADD UNIQUE INDEX (`loginId`);
 
 # authKey 칼럼에 유니크 인덱스 추가
 ALTER TABLE `expert` ADD UNIQUE INDEX (`authKey`);
-
+select * from `expert`;
 # 전문가회원, 테스트 데이터 생성
 INSERT INTO `expert`
 SET regDate = NOW(),
@@ -155,8 +155,7 @@ SET regDate = NOW(),
     `email` = 'expert1@expert1.com',
     `cellphoneNo` = 01011111111,
     `region` = '대전광역시',
-    `license` = '장례지도사2급',
-    `career` = '3년';
+    `license` = '장례지도사2급';
 
 INSERT INTO `expert`
 SET regDate = NOW(),
@@ -168,8 +167,7 @@ SET regDate = NOW(),
     `email` = 'expert2@expert2.com',
     `cellphoneNo` = 01022222222,
     `region` = '서울특별시',
-    `license` = '장례지도사2급',
-    `career` = '5년';
+    `license` = '장례지도사2급';
 
 INSERT INTO `expert`
 SET regDate = NOW(),
@@ -181,8 +179,7 @@ SET regDate = NOW(),
     `email` = 'expert3@expert3.com',
     `cellphoneNo` = 01033333333,
     `region` = '부산광역시',
-    `license` = '장례지도사2급',
-    `career` = '1년';
+    `license` = '장례지도사2급';
     
 INSERT INTO `expert`
 SET regDate = NOW(),
@@ -194,67 +191,8 @@ SET regDate = NOW(),
     `email` = 'expert4@expert4.com',
     `cellphoneNo` = 01044444444,
     `region` = '대전광역시',
-    `license` = '장례지도사2급',
-    `career` = '1년';
+    `license` = '장례지도사2급';
     
-# 도우미회원 테이블 생성
-CREATE TABLE `assistant` (
-    id INT(10) UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    regDate DATETIME NOT NULL,
-    updateDate DATETIME NOT NULL,
-    loginId CHAR(30) NOT NULL,
-    loginPw VARCHAR(100) NOT NULL,
-    authKey CHAR(80) NOT NULL,
-    `name` CHAR(30) NOT NULL,
-    `email` CHAR(100) NOT NULL,
-    `cellphoneNo` CHAR(20) NOT NULL,
-    `region` CHAR(100) NOT NULL, #지역
-    `career` TEXT #경력
-
-);
-
-# 로그인 ID로 검색했을 때
-ALTER TABLE `assistant` ADD UNIQUE INDEX (`loginId`);
-
-# authKey 칼럼에 유니크 인덱스 추가
-ALTER TABLE `assistant` ADD UNIQUE INDEX (`authKey`);
-
-# 도우미회원, 테스트 데이터 생성
-INSERT INTO `assistant`
-SET regDate = NOW(),
-    updateDate = NOW(),
-    loginId = 'asst1',
-    loginPw = 'asst1',
-    authKey = 'authKey3__1',
-    `name` = 'asst1',
-    `email` = 'asst1@asst1.com',
-    `cellphoneNo` = 01011111111,
-    `region` = '대전광역시',
-    `career` = '5년';
-
-INSERT INTO `assistant`
-SET regDate = NOW(),
-    updateDate = NOW(),
-    loginId = 'asst2',
-    loginPw = 'asst2',
-    authKey = 'authKey3__2',
-    `name` = 'asst2',
-    `email` = 'asst2@asst2.com',
-    `cellphoneNo` = 01022222222,
-    `region` = '인천광역시',
-    `career` = '2년';
-
-INSERT INTO `assistant`
-SET regDate = NOW(),
-    updateDate = NOW(),
-    loginId = 'asst3',
-    loginPw = 'asst3',
-    authKey = 'authKey3__3',
-    `name` = 'asst3',
-    `email` = 'asst3@asst3.com',
-    `cellphoneNo` = 01033333333,
-    `region` = '광주광역시',
-    `career` = '4년';
 
 # 파일 테이블 추가
 CREATE TABLE genFile (
